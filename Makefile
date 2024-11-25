@@ -1,15 +1,12 @@
 NAME = pipex
 FLAGS = -Wall -Wextra -Werror -g
 
-SOURCES = main.c
+SOURCES = main.c ft_putstr_fd.c
 
 OBJS = $(SOURCES:.c=.o)
 
-$(NAME): libft/libft.a $(OBJS)
-	cc $(FLAGS) -o $(NAME) $(OBJS) libft/libft.a
-
-libft/libft.a:
-	make -C libft libft.a
+$(NAME): $(OBJS)
+	cc $(FLAGS) -o $(NAME) $(OBJS)
 
 %.o: %.c
 	cc $(FLAGS) -c $< -o $@
