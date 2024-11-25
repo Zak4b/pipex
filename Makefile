@@ -1,17 +1,17 @@
 NAME = pipex
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -g
 
 SOURCES = main.c
 
 OBJS = $(SOURCES:.c=.o)
 
-$(NAME): $(OBJS)
+$(NAME): libft/libft.a $(OBJS)
 	cc $(FLAGS) -o $(NAME) $(OBJS) libft/libft.a
 
 libft/libft.a:
-	cd libft && make libft.a
+	make -C libft libft.a
 
-%.o: %.c | libft/libft.a
+%.o: %.c
 	cc $(FLAGS) -c $< -o $@
 
 all: $(NAME)

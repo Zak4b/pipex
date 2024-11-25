@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 15:19:56 by asene             #+#    #+#             */
-/*   Updated: 2024/11/15 11:10:49 by asene            ###   ########.fr       */
+/*   Updated: 2024/11/20 15:39:03 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,30 +28,45 @@ static int	is_conversion(char c)
 	return (0);
 }
 
-static int	handle_conversion(char **str, va_list args)
+static int	handle_conversion(int fd, char **str, va_list args)
 {
 	int	count;
 
 	count = 0;
 	(*str)++;
 	if (**str == 'c')
-		count = ft_printf_putchar(va_arg(args, int));
+		count = ft_printf_putchar(fd, va_arg(args, int));
 	else if (**str == 's')
-		count = ft_printf_putstr(va_arg(args, char *));
+		count = ft_printf_putstr(fd, va_arg(args, char *));
 	else if (**str == 'p')
-		count = ft_printf_put_pointer(va_arg(args, void *));
+		count = ft_printf_put_pointer(fd, va_arg(args, void *));
 	else if (**str == 'd' || **str == 'i')
-		count = ft_printf_putnbr(va_arg(args, int));
+		count = ft_printf_putnbr(fd, va_arg(args, int));
 	else if (**str == 'u')
-		count = ft_printf_putnbru((int)va_arg(args, unsigned int));
+		count = ft_printf_putnbru(fd, (int)va_arg(args, unsigned int));
 	else if (**str == 'x')
-		count = ft_printf_puthex(va_arg(args, unsigned int), HEX_BASE_LOWER);
+		count = ft_printf_puthex(fd, va_arg(args, unsigned int), HEX_BASE_L);
 	else if (**str == 'X')
-		count = ft_printf_puthex(va_arg(args, unsigned int), HEX_BASE_UPPER);
+		count = ft_printf_puthex(fd, va_arg(args, unsigned int), HEX_BASE_U);
 	else if (**str == '%')
-		count = ft_printf_putchar('%');
+		count = ft_printf_putchar(fd, '%');
 	(*str)++;
 	return (count);
+}
+
+static int	ft_printf_va(int fd, const char *format, va_list args)
+{
+	int	char_count;
+
+	char_count = 0;
+	while (*format)
+	{
+		if (*format == '%' && *(format + 1) && is_conversion(*(format + 1)))
+			char_count += handle_conversion(fd, (char **)&format, args);
+		else
+			char_count += ft_printf_putchar(fd, *(format++));
+	}
+	return (char_count);
 }
 
 int	ft_printf(const char *format, ...)
@@ -59,15 +74,19 @@ int	ft_printf(const char *format, ...)
 	int		char_count;
 	va_list	args;
 
-	char_count = 0;
 	va_start(args, format);
-	while (*format)
-	{
-		if (*format == '%' && *(format + 1) && is_conversion(*(format + 1)))
-			char_count += handle_conversion((char **)&format, args);
-		else
-			char_count += ft_printf_putchar(*(format++));
-	}
+	char_count = ft_printf_va(1, format, args);
+	va_end(args);
+	return (char_count);
+}
+
+int	ft_fprintf(int fd, char *format, ...)
+{
+	int		char_count;
+	va_list	args;
+
+	va_start(args, format);
+	char_count = ft_printf_va(fd, format, args);
 	va_end(args);
 	return (char_count);
 }
